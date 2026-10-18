@@ -17,7 +17,7 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Tuple
 
 from blockchain import Blockchain, Transaction
-from consensus import BaselineConsensus, HybridConsensus, MineResult
+from consensus import BaselineConsensus, HybridConsensus, MLAdaptiveConsensus, MineResult
 
 
 # ──────────────────────────────────────────────
@@ -201,16 +201,18 @@ def _aggregate(label: str, runs: List[RunMetrics], n_tx: int, ratio: float) -> E
 # ──────────────────────────────────────────────
 # Public API
 # ──────────────────────────────────────────────
-def run_experiment(cfg: ExperimentConfig) -> Tuple[ExperimentResult, ExperimentResult]:
-    """Execute both engines *cfg.repeats* times and return (baseline, proposed)."""
+def run_experiment(cfg: ExperimentConfig) -> Tuple[ExperimentResult, ExperimentResult, ExperimentResult]:
+    """Execute Baseline, Heuristic, and ML-Adaptive engines *cfg.repeats* times."""
     baseline_engine = BaselineConsensus(difficulty=cfg.baseline_difficulty)
-    hybrid_engine = HybridConsensus(
+    heuristic_engine = HybridConsensus(
         light_difficulty=cfg.hybrid_light_difficulty,
         strong_difficulty=cfg.hybrid_strong_difficulty,
     )
+    ml_consensus_engine = MLAdaptiveConsensus()
 
     baseline_runs: List[RunMetrics] = []
-    hybrid_runs: List[RunMetrics] = []
+    heuristic_runs: List[RunMetrics] = []
+    ml_runs: List[RunMetrics] = []
 
     for rep in range(cfg.repeats):
         rng = random.Random(cfg.seed + rep)
@@ -219,25 +221,30 @@ def run_experiment(cfg: ExperimentConfig) -> Tuple[ExperimentResult, ExperimentR
         # Deep-copy transactions for each engine so submit_times are independent
         import copy
         txs_baseline = copy.deepcopy(txs)
-        txs_hybrid = copy.deepcopy(txs)
+        txs_heuristic = copy.deepcopy(txs)
+        txs_ml = copy.deepcopy(txs)
 
         print(f"    Run {rep + 1}/{cfg.repeats}  "
               f"(n={cfg.num_transactions}, light={cfg.lightweight_ratio:.0%}) ... ",
               end="", flush=True)
 
         bm = _run_once(txs_baseline, baseline_engine, cfg.block_size)
-        hm = _run_once(txs_hybrid, hybrid_engine, cfg.block_size)
+        hm = _run_once(txs_heuristic, heuristic_engine, cfg.block_size)
+        mm = _run_once(txs_ml, ml_consensus_engine, cfg.block_size)
 
         baseline_runs.append(bm)
-        hybrid_runs.append(hm)
+        heuristic_runs.append(hm)
+        ml_runs.append(mm)
 
         status_b = "OK" if bm.chain_valid else "FAIL"
         status_h = "OK" if hm.chain_valid else "FAIL"
-        print(f"Baseline chain {status_b} | Proposed chain {status_h}")
+        status_m = "OK" if mm.chain_valid else "FAIL"
+        print(f"Base: {status_b} | Heuristic: {status_h} | ML: {status_m}")
 
     baseline_result = _aggregate("Baseline", baseline_runs, cfg.num_transactions, cfg.lightweight_ratio)
-    hybrid_result = _aggregate("Proposed", hybrid_runs, cfg.num_transactions, cfg.lightweight_ratio)
-    return baseline_result, hybrid_result
+    heuristic_result = _aggregate("Heuristic", heuristic_runs, cfg.num_transactions, cfg.lightweight_ratio)
+    ml_result = _aggregate("ML-Adaptive", ml_runs, cfg.num_transactions, cfg.lightweight_ratio)
+    return baseline_result, heuristic_result, ml_result
 
 
 def run_full_experiment_suite(
@@ -248,17 +255,17 @@ def run_full_experiment_suite(
     hybrid_light_difficulty: int = 1,
     hybrid_strong_difficulty: int = 3,
     block_size: int = 10,
-) -> List[Tuple[ExperimentConfig, ExperimentResult, ExperimentResult]]:
-    """Run experiments across all load × mix combinations.
+) -> List[Tuple[ExperimentConfig, ExperimentResult, ExperimentResult, ExperimentResult]]:
+    """Run experiments across all load × mix combinations for all three engines.
 
-    Returns a list of (config, baseline_result, proposed_result) tuples.
+    Returns a list of (config, baseline_res, heuristic_res, ml_res) tuples.
     """
     if loads is None:
         loads = [100, 500, 1000]
     if mixes is None:
         mixes = [0.9, 0.7, 0.5]
 
-    results: List[Tuple[ExperimentConfig, ExperimentResult, ExperimentResult]] = []
+    results: List[Tuple[ExperimentConfig, ExperimentResult, ExperimentResult, ExperimentResult]] = []
 
     for n in loads:
         for ratio in mixes:
@@ -274,7 +281,59 @@ def run_full_experiment_suite(
             print(f"\n{'='*60}")
             print(f"  Experiment: {n} txs, {ratio:.0%} lightweight")
             print(f"{'='*60}")
-            b, h = run_experiment(cfg)
-            results.append((cfg, b, h))
+            b, h, m = run_experiment(cfg)
+            results.append((cfg, b, h, m))
 
     return results
+
+
+def run_adversarial_security_benchmark() -> Dict[str, any]:
+    """Tests resilience against Structuring / Smurfing Evasion Attacks.
+
+    Adversary Model:
+      An attacker sends a rapid burst of transactions priced just below the 
+      static threshold (INR 95.00 each) to force the consensus engine to apply
+      Difficulty 1, enabling a subsequent low-cost chain reorganization.
+
+    Evaluates:
+      - Heuristic engine detection rate (fails: stays at Diff 1)
+      - ML-Adaptive engine detection rate (succeeds: detects velocity anomaly and elevates to Diff 3)
+    """
+    heuristic_engine = HybridConsensus(light_difficulty=1, strong_difficulty=3)
+    ml_engine = MLAdaptiveConsensus()
+
+    # Generate 10 burst transactions from the same sender
+    attack_txs: List[Transaction] = []
+    now = time.time()
+    for i in range(10):
+        tx = Transaction(
+            tx_id=f"attack-tx-{i:03d}",
+            sender="0xMaliciousAttacker_X",
+            receiver="0xMuleVault",
+            amount=95.0,  # Just below 100 threshold
+            tx_type="lightweight",
+            timestamp=now + (i * 0.5), # Rapid burst
+            submit_time=time.perf_counter()
+        )
+        attack_txs.append(tx)
+
+    chain_h = Blockchain()
+    chain_m = Blockchain()
+
+    res_h = heuristic_engine.mine(chain_h, attack_txs)
+    res_m = ml_engine.mine(chain_m, attack_txs)
+
+    heuristic_intercepted = res_h.block.difficulty >= 3
+    ml_intercepted = res_m.block.difficulty >= 3
+
+    return {
+        "attack_type": "Smurfing / Structuring Micro-Burst Evasion",
+        "attack_transactions": len(attack_txs),
+        "target_amount_per_tx": 95.0,
+        "heuristic_difficulty_assigned": res_h.block.difficulty,
+        "heuristic_intercepted": heuristic_intercepted,
+        "ml_difficulty_assigned": res_m.block.difficulty,
+        "ml_intercepted": ml_intercepted,
+        "ml_reasoning": getattr(res_m.block, "ml_reason", "High risk detected"),
+    }
+
