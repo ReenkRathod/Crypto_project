@@ -163,14 +163,30 @@ class BlockchainRequestHandler(BaseHTTPRequestHandler):
         except Exception:
             payload = {}
 
+        # Real-time ML Prediction endpoint
+        if path == "/api/predict-risk":
+            sender = payload.get("sender", "0xUserA").strip() or "0xUserA"
+            amount = float(payload.get("amount", 10.0))
+            ml_res = ml_engine.evaluate_transaction(amount, sender, time.time())
+            self._send_json({
+                "success": True,
+                "risk_level": ml_res.risk_level,
+                "risk_score": ml_res.risk_score,
+                "confidence": ml_res.confidence,
+                "suggested_difficulty": ml_res.suggested_difficulty,
+                "reasoning": ml_res.reasoning
+            })
+            return
+
         # 1. Add Single Transaction
         if path == "/api/transaction":
             sender = payload.get("sender", "0xUserA").strip() or "0xUserA"
             receiver = payload.get("receiver", "0xUserB").strip() or "0xUserB"
             amount = float(payload.get("amount", 10.0))
-            tx_type = payload.get("tx_type")
-            if not tx_type:
-                tx_type = "strong" if amount >= 1000.0 else "lightweight"
+            
+            # Use ML model to classify risk level
+            ml_res = ml_engine.evaluate_transaction(amount, sender, time.time())
+            tx_type = "strong" if ml_res.suggested_difficulty >= 3 else "lightweight"
 
             tx = Transaction(
                 tx_id=f"tx-{uuid.uuid4().hex[:6]}",
@@ -183,13 +199,15 @@ class BlockchainRequestHandler(BaseHTTPRequestHandler):
             mempool.append(tx)
             self._send_json({
                 "success": True,
-                "message": f"Added {tx_type} transaction for ₹{amount:,.2f}",
+                "message": f"Added {tx_type} transaction for INR {amount:,.2f}",
                 "transaction": tx.to_dict(),
+                "ml_risk": ml_res.risk_level,
+                "reasoning": ml_res.reasoning,
                 "mempool_size": len(mempool)
             })
             return
 
-        # 2. Add Sample Presets (Chai, Metro, Contract)
+        # 2. Add Sample Presets (Chai, Metro, Contract, Smurfing Attack)
         if path == "/api/quick-batch":
             preset = payload.get("preset", "lightweight")
             added = []
@@ -198,6 +216,15 @@ class BlockchainRequestHandler(BaseHTTPRequestHandler):
                     ("0xRohan_22", "0xChaiPoint", 25.0, "lightweight"),
                     ("0xPriya_77", "0xMetroRail", 60.0, "lightweight"),
                     ("0xAmit_99", "0xGroceryStore", 180.0, "lightweight"),
+                ]
+            elif preset == "smurfing":
+                # Rapid burst of transactions just under 100 threshold from same sender
+                items = [
+                    ("0xAttacker_X", "0xMuleWallet", 95.0, "lightweight"),
+                    ("0xAttacker_X", "0xMuleWallet", 92.0, "lightweight"),
+                    ("0xAttacker_X", "0xMuleWallet", 98.0, "lightweight"),
+                    ("0xAttacker_X", "0xMuleWallet", 94.0, "lightweight"),
+                    ("0xAttacker_X", "0xMuleWallet", 97.0, "lightweight"),
                 ]
             else: # strong / high-value settlement
                 items = [

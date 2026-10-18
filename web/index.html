@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Adaptive Hybrid Consensus Blockchain Explorer</title>
+  <title>Intelligent Adaptive Consensus Blockchain Explorer</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -12,7 +12,6 @@
       --bg: #0b0f19;
       --card-bg: rgba(22, 28, 45, 0.85);
       --card-border: rgba(255, 255, 255, 0.08);
-      --card-hover: rgba(30, 41, 68, 0.95);
       --text: #f1f5f9;
       --text-muted: #94a3b8;
       --cyan: #06b6d4;
@@ -24,7 +23,7 @@
       --gold: #f59e0b;
       --gold-glow: rgba(245, 158, 11, 0.25);
       --purple: #8b5cf6;
-      --radius: 14px;
+      --radius: 12px;
     }
 
     * {
@@ -49,17 +48,17 @@
       margin: 0 auto;
     }
 
-    /* Top Navigation / Header */
+    /* Header */
     header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 18px 28px;
+      padding: 18px 24px;
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: var(--radius);
       backdrop-filter: blur(12px);
-      margin-bottom: 24px;
+      margin-bottom: 20px;
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
     }
 
@@ -67,7 +66,7 @@
       font-size: 22px;
       font-weight: 700;
       letter-spacing: -0.5px;
-      background: linear-gradient(135deg, #fff, #94a3b8);
+      background: linear-gradient(135deg, #fff, #cbd5e1);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
@@ -82,7 +81,7 @@
     .header-actions {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 14px;
     }
 
     .status-badge {
@@ -142,10 +141,48 @@
       background: rgba(255, 255, 255, 0.14);
     }
 
-    /* Grid Layout */
+    /* Top Telemetry Stats Bar */
+    .telemetry-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 900px) {
+      .telemetry-bar {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .stat-chip {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      backdrop-filter: blur(10px);
+    }
+
+    .stat-chip .label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+
+    .stat-chip .val {
+      font-size: 20px;
+      font-weight: 700;
+      color: #fff;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Dashboard Main Grid */
     .dashboard-grid {
       display: grid;
-      grid-template-columns: 420px 1fr;
+      grid-template-columns: 460px 1fr;
       gap: 24px;
     }
 
@@ -155,7 +192,6 @@
       }
     }
 
-    /* Card Panels */
     .panel {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
@@ -170,13 +206,13 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
       padding-bottom: 12px;
       border-bottom: 1px solid var(--card-border);
     }
 
     .panel-title {
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 600;
       color: #fff;
       display: flex;
@@ -184,16 +220,16 @@
       gap: 8px;
     }
 
-    /* Forms & Inputs */
+    /* Forms */
     .form-group {
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
 
     .form-label {
       display: block;
       font-size: 12px;
       color: var(--text-muted);
-      margin-bottom: 6px;
+      margin-bottom: 5px;
       font-weight: 500;
     }
 
@@ -215,7 +251,8 @@
       box-shadow: 0 0 0 2px var(--cyan-glow);
     }
 
-    .preset-buttons {
+    /* Presets */
+    .preset-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 8px;
@@ -232,6 +269,7 @@
       cursor: pointer;
       text-align: left;
       transition: all 0.15s ease;
+      font-weight: 500;
     }
 
     .btn-preset:hover {
@@ -246,6 +284,68 @@
 
     .btn-preset.strong:hover {
       background: rgba(245, 158, 11, 0.2);
+    }
+
+    .btn-preset.attack {
+      grid-column: span 2;
+      background: rgba(239, 68, 68, 0.12);
+      border-color: rgba(239, 68, 68, 0.35);
+      color: #f87171;
+      font-weight: 600;
+    }
+
+    .btn-preset.attack:hover {
+      background: rgba(239, 68, 68, 0.22);
+    }
+
+    /* Live ML Inspector Card */
+    .ml-inspector {
+      background: rgba(11, 15, 25, 0.85);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 16px;
+    }
+
+    .ml-inspector-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .ml-tag {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .ml-tag.low {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+
+    .ml-tag.medium {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+
+    .ml-tag.high {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+    }
+
+    .ml-reason-text {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.4;
+      font-family: 'JetBrains Mono', monospace;
     }
 
     .btn-primary {
@@ -267,7 +367,7 @@
     .mode-selector {
       display: flex;
       gap: 10px;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
       background: rgba(11, 15, 25, 0.6);
       padding: 4px;
       border-radius: 10px;
@@ -286,16 +386,15 @@
       transition: all 0.2s;
     }
 
-    .mode-btn.active {
-      background: rgba(255, 255, 255, 0.12);
-      color: #fff;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    }
-
-    .mode-btn.active.hybrid {
+    .mode-btn.active.ml {
       background: linear-gradient(135deg, rgba(6, 182, 212, 0.3), rgba(139, 92, 246, 0.3));
       color: #38bdf8;
       border: 1px solid rgba(6, 182, 212, 0.4);
+    }
+
+    .mode-btn.active.baseline {
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
     }
 
     .btn-mine {
@@ -303,7 +402,7 @@
       background: linear-gradient(135deg, #10b981, #059669);
       color: #fff;
       padding: 14px;
-      font-size: 15px;
+      font-size: 14px;
       border-radius: 8px;
       box-shadow: 0 4px 20px var(--green-glow);
     }
@@ -313,21 +412,21 @@
       transform: translateY(-1px);
     }
 
-    /* Mining Feedback Box */
     .mine-feedback {
       margin-top: 14px;
-      padding: 14px;
+      padding: 12px 14px;
       border-radius: 8px;
       background: rgba(11, 15, 25, 0.8);
       border: 1px solid var(--card-border);
       font-family: 'JetBrains Mono', monospace;
       font-size: 12px;
       display: none;
+      line-height: 1.5;
     }
 
-    /* Mempool Transactions List */
+    /* Mempool */
     .tx-list {
-      max-height: 220px;
+      max-height: 200px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
@@ -338,32 +437,14 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 10px 12px;
+      padding: 9px 12px;
       background: rgba(11, 15, 25, 0.5);
       border: 1px solid var(--card-border);
       border-radius: 8px;
       font-size: 12px;
     }
 
-    .tx-item .badge {
-      font-size: 10px;
-      padding: 3px 8px;
-      border-radius: 4px;
-      font-weight: 600;
-      text-transform: uppercase;
-    }
-
-    .badge-light {
-      background: rgba(6, 182, 212, 0.15);
-      color: #38bdf8;
-    }
-
-    .badge-strong {
-      background: rgba(245, 158, 11, 0.15);
-      color: #fbbf24;
-    }
-
-    /* Blockchain Explorer Cards */
+    /* Blockchain Ledger Cards */
     .chain-container {
       display: flex;
       flex-direction: column;
@@ -375,7 +456,6 @@
       border: 1px solid var(--card-border);
       border-radius: var(--radius);
       padding: 20px;
-      position: relative;
       transition: all 0.25s ease;
     }
 
@@ -400,15 +480,9 @@
     }
 
     .block-number {
-      font-size: 17px;
+      font-size: 16px;
       font-weight: 700;
       color: #fff;
-    }
-
-    .block-meta {
-      display: flex;
-      align-items: center;
-      gap: 10px;
     }
 
     .diff-badge {
@@ -425,10 +499,16 @@
       border: 1px solid rgba(16, 185, 129, 0.3);
     }
 
-    .diff-3 {
+    .diff-2 {
       background: rgba(245, 158, 11, 0.15);
       color: #fbbf24;
       border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .diff-3 {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
     }
 
     .hash-field {
@@ -441,6 +521,17 @@
 
     .hash-val {
       color: #38bdf8;
+    }
+
+    .ml-callout {
+      margin-top: 10px;
+      padding: 8px 12px;
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid rgba(139, 92, 246, 0.25);
+      border-radius: 6px;
+      font-size: 11px;
+      color: #c4b5fd;
+      font-family: 'JetBrains Mono', monospace;
     }
 
     .block-stats {
@@ -470,32 +561,6 @@
     .btn-tamper:hover {
       background: rgba(239, 68, 68, 0.2);
     }
-
-    /* Analytics Gallery */
-    .analytics-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 16px;
-      margin-top: 20px;
-    }
-
-    .chart-card {
-      background: rgba(11, 15, 25, 0.6);
-      border: 1px solid var(--card-border);
-      border-radius: 10px;
-      padding: 12px;
-    }
-
-    .chart-card h4 {
-      font-size: 13px;
-      color: var(--text-muted);
-      margin-bottom: 8px;
-    }
-
-    .chart-card img {
-      width: 100%;
-      border-radius: 6px;
-    }
   </style>
 </head>
 <body>
@@ -503,16 +568,36 @@
     <!-- Header -->
     <header>
       <div class="brand">
-        <h1>Adaptive Hybrid Consensus Explorer</h1>
-        <p>BCSE328L Cryptocurrency Technologies — Dynamic PoW Difficulty Scaling</p>
+        <h1>Adaptive Consensus Blockchain Explorer</h1>
+        <p>BCSE328L Cryptocurrency Technologies — Machine Learning-Driven Consensus</p>
       </div>
       <div class="header-actions">
         <div id="chainStatusBadge" class="status-badge status-valid">
-          <span style="font-size: 16px;">●</span> Chain Integrity: 100% Valid
+          <span style="font-size: 14px;">●</span> Chain Integrity: 100% Valid
         </div>
         <button onclick="resetBlockchain()" class="btn btn-reset">↺ Reset Chain</button>
       </div>
     </header>
+
+    <!-- Top Telemetry Stats Bar -->
+    <div class="telemetry-bar">
+      <div class="stat-chip">
+        <div class="label">Total Blocks</div>
+        <div id="statBlocks" class="val">1</div>
+      </div>
+      <div class="stat-chip">
+        <div class="label">Total Transactions</div>
+        <div id="statTransactions" class="val">2</div>
+      </div>
+      <div class="stat-chip">
+        <div class="label">Total SHA-256 Hashes</div>
+        <div id="statHashes" class="val">0</div>
+      </div>
+      <div class="stat-chip">
+        <div class="label">Consensus Engine</div>
+        <div class="val" style="font-size: 15px; color: var(--cyan); padding-top: 4px;">RandomForest ML</div>
+      </div>
+    </div>
 
     <!-- Main Grid -->
     <div class="dashboard-grid">
@@ -525,43 +610,54 @@
             <span id="mempoolCountBadge" style="font-size: 11px; color: var(--cyan);">2 in pool</span>
           </div>
 
-          <!-- Quick Presets -->
-          <div class="form-label">Quick Real-World Presets:</div>
-          <div class="preset-buttons">
-            <button class="btn-preset" onclick="fillPreset('0xRohan22', '0xChaiPoint', 25.0, 'lightweight')">
-              ☕ ₹25 Chai (Light)
+          <!-- Presets -->
+          <div class="form-label">Real-World Scenario Presets:</div>
+          <div class="preset-grid">
+            <button class="btn-preset" onclick="fillPreset('0xRohan_22', '0xChaiPoint', 25.0)">
+              ☕ ₹25 Chai (Micropayment)
             </button>
-            <button class="btn-preset" onclick="fillPreset('0xPriya77', '0xMetroCard', 60.0, 'lightweight')">
-              🚆 ₹60 Metro (Light)
+            <button class="btn-preset" onclick="fillPreset('0xPriya_77', '0xMetroRail', 60.0)">
+              🚆 ₹60 Metro (Micropayment)
             </button>
-            <button class="btn-preset strong" onclick="fillPreset('0xFinCorp', '0xEscrowVault', 250000.0, 'strong')">
-              🏛️ ₹2.5L Escrow (Strong)
+            <button class="btn-preset strong" onclick="fillPreset('0xFinCorp', '0xEscrowVault', 250000.0)">
+              🏛️ ₹2.5L Escrow (High Value)
             </button>
-            <button class="btn-preset strong" onclick="fillPreset('0xTechCorp', '0xVendorSettlement', 850000.0, 'strong')">
-              📑 ₹8.5L Contract (Strong)
+            <button class="btn-preset strong" onclick="fillPreset('0xTechCorp', '0xVendorSettlement', 750000.0)">
+              📑 ₹7.5L Contract (High Value)
+            </button>
+            <button class="btn-preset attack" onclick="simulateSmurfingAttack()">
+              🚨 Simulate Split-Micro (Smurfing) Attack
             </button>
           </div>
 
           <form id="txForm" onsubmit="handleTransactionSubmit(event)">
             <div class="form-group">
-              <label class="form-label">Sender Address</label>
-              <input type="text" id="txSender" class="form-control" value="0xAlice_4A" required>
+              <label class="form-label">Sender Wallet Address</label>
+              <input type="text" id="txSender" class="form-control" value="0xAlice_4A" oninput="runLiveMLCheck()" required>
             </div>
             <div class="form-group">
-              <label class="form-label">Receiver Address</label>
+              <label class="form-label">Receiver Wallet Address</label>
               <input type="text" id="txReceiver" class="form-control" value="0xBob_9F" required>
             </div>
             <div class="form-group">
-              <label class="form-label">Transfer Amount (₹)</label>
-              <input type="number" id="txAmount" class="form-control" value="50.0" step="0.01" min="0.01" oninput="updateTxTypeHint()" required>
+              <label class="form-label">Transfer Amount (INR ₹)</label>
+              <input type="number" id="txAmount" class="form-control" value="25.0" step="0.01" min="0.01" oninput="runLiveMLCheck()" required>
             </div>
-            <div class="form-group">
-              <label class="form-label">Risk Category (Auto-classified)</label>
-              <select id="txType" class="form-control">
-                <option value="lightweight">Lightweight (Micropayment &lt; ₹1,000)</option>
-                <option value="strong">Strong (High-Value Transfer &gt;= ₹1,000)</option>
-              </select>
+
+            <!-- Live ML Risk Inspector Card -->
+            <div class="ml-inspector">
+              <div class="ml-inspector-header">
+                <span style="font-size: 11px; font-weight: 600; color: #fff;">🤖 ML Telemetry Evaluation:</span>
+                <span id="mlRiskTag" class="ml-tag low">LOW RISK (Diff 1)</span>
+              </div>
+              <div id="mlConfidenceText" style="font-size: 11px; color: var(--cyan); margin-bottom: 6px;">
+                Confidence: 99.3% | Model: Random Forest Classifier
+              </div>
+              <div id="mlReasonText" class="ml-reason-text">
+                Verified low-risk micropayment (INR 25.00). Low-latency fast path approved.
+              </div>
             </div>
+
             <button type="submit" class="btn btn-primary">+ Add to Transaction Pool</button>
           </form>
         </div>
@@ -572,23 +668,22 @@
             <span class="panel-title">⛏️ Consensus Mining Engine</span>
           </div>
 
-          <div class="form-label">Choose Mining Mechanism:</div>
+          <div class="form-label">Select Consensus Engine:</div>
           <div class="mode-selector">
-            <button id="modeHybrid" class="mode-btn active hybrid" onclick="setConsensusMode('hybrid')">
-              Proposed: Hybrid (Adaptive)
+            <button id="modeML" class="mode-btn active ml" onclick="setConsensusMode('hybrid')">
+              Proposed: ML-Adaptive
             </button>
             <button id="modeBaseline" class="mode-btn" onclick="setConsensusMode('baseline')">
-              Baseline: Uniform (Fixed Diff)
+              Baseline: Uniform Fixed
             </button>
           </div>
 
           <div id="modeDescription" style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5;">
-            ⚡ <strong>Hybrid Engine</strong>: Evaluates pending transactions. If all are lightweight, difficulty is set to <strong>1</strong> (fast, green). If any is high-value, difficulty elevates to <strong>3</strong> for heavy security.
+            🤖 <strong>ML-Adaptive Engine</strong>: The trained Random Forest model evaluates multi-dimensional risk telemetry across the batch. Low-risk micropayments are mined with Diff 1 in milliseconds; high-value settlements and detected smurfing attacks trigger Diff 3.
           </div>
 
-          <button onclick="mineBlock()" class="btn btn-mine">⚡ Mine Next Block Now</button>
+          <button onclick="mineBlock()" class="btn btn-mine">⚡ Mine Next Block</button>
 
-          <!-- Mining Feedback -->
           <div id="mineFeedback" class="mine-feedback"></div>
         </div>
 
@@ -601,40 +696,14 @@
         </div>
       </div>
 
-      <!-- Right Column: Live Blockchain Visualizer & Charts -->
+      <!-- Right Column: Live Blockchain Visualizer -->
       <div>
-        <div class="panel">
+        <div class="panel" style="min-height: 600px;">
           <div class="panel-header">
-            <span class="panel-title">⛓️ Live Blockchain Ledger (<span id="blockCountText">1 Block</span>)</span>
-            <span style="font-size: 12px; color: var(--text-muted);">Real-time cryptographic hash-chain</span>
+            <span class="panel-title">⛓️ Live Cryptographic Blockchain Ledger</span>
+            <span style="font-size: 12px; color: var(--text-muted);">Immutable SHA-256 Hash-Linked Chain</span>
           </div>
           <div id="blockchainContainer" class="chain-container"></div>
-        </div>
-
-        <!-- Benchmark Charts Section -->
-        <div class="panel">
-          <div class="panel-header">
-            <span class="panel-title">📊 Empirical Benchmark Results</span>
-            <span style="font-size: 12px; color: var(--cyan);">Generated from experimental suite</span>
-          </div>
-          <div class="analytics-grid">
-            <div class="chart-card">
-              <h4>Average Latency vs Load</h4>
-              <img src="/results/charts/latency_vs_load.png" alt="Latency Chart" onerror="this.parentElement.style.display='none'">
-            </div>
-            <div class="chart-card">
-              <h4>Hash Cost Reduction</h4>
-              <img src="/results/charts/cost_vs_load.png" alt="Cost Chart" onerror="this.parentElement.style.display='none'">
-            </div>
-            <div class="chart-card">
-              <h4>Throughput (tx/s) Scaling</h4>
-              <img src="/results/charts/throughput_vs_load.png" alt="Throughput Chart" onerror="this.parentElement.style.display='none'">
-            </div>
-            <div class="chart-card">
-              <h4>Effect of Lightweight Mix</h4>
-              <img src="/results/charts/mix_effect.png" alt="Mix Effect Chart" onerror="this.parentElement.style.display='none'">
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -643,6 +712,7 @@
   <script>
     let currentMode = 'hybrid';
     let systemState = null;
+    let mlDebounce = null;
 
     async function fetchState() {
       try {
@@ -656,32 +726,64 @@
 
     function setConsensusMode(mode) {
       currentMode = mode;
-      const bHybrid = document.getElementById('modeHybrid');
+      const bML = document.getElementById('modeML');
       const bBase = document.getElementById('modeBaseline');
       const desc = document.getElementById('modeDescription');
 
       if (mode === 'hybrid') {
-        bHybrid.className = 'mode-btn active hybrid';
+        bML.className = 'mode-btn active ml';
         bBase.className = 'mode-btn';
-        desc.innerHTML = '⚡ <strong>Proposed Hybrid Engine</strong>: Evaluates transaction batch. If all are lightweight, difficulty is set to <strong>1</strong> (fast, green). If any is high-value, difficulty elevates to <strong>3</strong> for heavy security.';
+        desc.innerHTML = '🤖 <strong>ML-Adaptive Engine</strong>: The trained Random Forest model evaluates multi-dimensional risk telemetry across the batch. Low-risk micropayments are mined with Diff 1 in milliseconds; high-value settlements and detected smurfing attacks trigger Diff 3.';
       } else {
-        bBase.className = 'mode-btn active';
-        bHybrid.className = 'mode-btn';
+        bBase.className = 'mode-btn active baseline';
+        bML.className = 'mode-btn';
         desc.innerHTML = '🔒 <strong>Baseline Engine</strong>: Imposes fixed difficulty (3 leading zeros) on 100% of blocks regardless of whether transactions are small or large.';
       }
     }
 
-    function updateTxTypeHint() {
-      const amt = parseFloat(document.getElementById('txAmount').value) || 0;
-      const sel = document.getElementById('txType');
-      sel.value = amt >= 1000 ? 'strong' : 'lightweight';
+    async function runLiveMLCheck() {
+      clearTimeout(mlDebounce);
+      mlDebounce = setTimeout(async () => {
+        const sender = document.getElementById('txSender').value.trim() || '0xUserA';
+        const amount = parseFloat(document.getElementById('txAmount').value) || 0;
+
+        try {
+          const res = await fetch('/api/predict-risk', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sender, amount })
+          });
+          const data = await res.json();
+          if (data.success) {
+            const tag = document.getElementById('mlRiskTag');
+            tag.className = `ml-tag ${data.risk_level}`;
+            tag.innerText = `${data.risk_level.toUpperCase()} RISK (Diff ${data.suggested_difficulty})`;
+
+            document.getElementById('mlConfidenceText').innerText = 
+              `Confidence: ${(data.confidence * 100).toFixed(1)}% | Model: Random Forest Classifier`;
+            document.getElementById('mlReasonText').innerText = data.reasoning;
+          }
+        } catch (e) {
+          console.error("ML check failed", e);
+        }
+      }, 200);
     }
 
-    function fillPreset(sender, receiver, amount, type) {
+    function fillPreset(sender, receiver, amount) {
       document.getElementById('txSender').value = sender;
       document.getElementById('txReceiver').value = receiver;
       document.getElementById('txAmount').value = amount;
-      document.getElementById('txType').value = type;
+      runLiveMLCheck();
+    }
+
+    async function simulateSmurfingAttack() {
+      alert("Simulating Smurfing Attack: Submitting 5 rapid micro-transactions of ~₹95 from 0xAttacker_X. In a naive if/else system, this tricks the engine into difficulty 1. Notice how our ML model detects the burst anomaly and elevates difficulty to 3!");
+      await fetch('/api/quick-batch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ preset: 'smurfing' })
+      });
+      fetchState();
     }
 
     async function handleTransactionSubmit(e) {
@@ -689,12 +791,11 @@
       const sender = document.getElementById('txSender').value;
       const receiver = document.getElementById('txReceiver').value;
       const amount = parseFloat(document.getElementById('txAmount').value);
-      const tx_type = document.getElementById('txType').value;
 
       const res = await fetch('/api/transaction', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sender, receiver, amount, tx_type })
+        body: JSON.stringify({ sender, receiver, amount })
       });
       const data = await res.json();
       if (data.success) {
@@ -720,17 +821,15 @@
 
       feedback.innerHTML = `
         <div style="color: #34d399; font-weight: bold; margin-bottom: 4px;">✓ Block #${data.block_index} Successfully Mined!</div>
-        <div>Consensus Mode: <strong>${data.mode.toUpperCase()}</strong></div>
-        <div>Difficulty Applied: <strong>${data.difficulty_applied} leading zero(s)</strong></div>
-        <div>Hash Attempts: <strong>${data.hash_attempts.toLocaleString()}</strong></div>
-        <div>Mining Wall-Clock: <strong>${data.mining_time_ms} ms</strong></div>
-        <div>New Hash: <span style="color: #38bdf8;">${data.block_hash.substring(0, 24)}...</span></div>
+        <div>Mode: <strong>${data.mode.toUpperCase()}</strong> | Difficulty: <strong>${data.difficulty_applied} leading zero(s)</strong></div>
+        <div>Hash Attempts: <strong>${data.hash_attempts.toLocaleString()}</strong> | Time: <strong>${data.mining_time_ms} ms</strong></div>
+        ${data.ml_reason ? `<div style="color: #c4b5fd; margin-top: 4px;">🤖 ML Decision: ${data.ml_reason}</div>` : ''}
       `;
       fetchState();
     }
 
     async function tamperBlock(idx) {
-      if (!confirm(`Are you sure you want to tamper with Block #${idx}? This will modify its transaction data and demonstrate chain invalidation.`)) return;
+      if (!confirm(`Demonstrate Tamper Detection: Modify Block #${idx} transactions? This will invalidate the chain hash link.`)) return;
 
       const res = await fetch('/api/tamper', {
         method: 'POST',
@@ -738,7 +837,6 @@
         body: JSON.stringify({ block_index: idx })
       });
       const data = await res.json();
-      alert(data.message);
       fetchState();
     }
 
@@ -752,14 +850,19 @@
     function renderDashboard() {
       if (!systemState) return;
 
-      // Status Badge
+      // Stats Bar
+      document.getElementById('statBlocks').innerText = systemState.total_blocks;
+      document.getElementById('statTransactions').innerText = systemState.total_transactions;
+      document.getElementById('statHashes').innerText = systemState.total_hashes.toLocaleString();
+
+      // Chain Status Badge
       const statusBadge = document.getElementById('chainStatusBadge');
       if (systemState.chain_valid) {
         statusBadge.className = 'status-badge status-valid';
-        statusBadge.innerHTML = '<span style="font-size: 16px;">●</span> Chain Integrity: 100% Valid';
+        statusBadge.innerHTML = '<span style="font-size: 14px;">●</span> Chain Integrity: 100% Valid';
       } else {
         statusBadge.className = 'status-badge status-invalid';
-        statusBadge.innerHTML = '<span style="font-size: 16px;">⚠️</span> TAMPER DETECTED: INVALID HASH-CHAIN!';
+        statusBadge.innerHTML = '⚠️ TAMPER DETECTED: INVALID HASH-CHAIN!';
       }
 
       // Mempool
@@ -772,9 +875,9 @@
           <div class="tx-item">
             <div>
               <div style="font-weight: 600;">${tx.sender} → ${tx.receiver}</div>
-              <div style="color: var(--text-muted); font-size: 11px;">₹${tx.amount.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+              <div style="color: var(--text-muted); font-size: 11px;">INR ${tx.amount.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
             </div>
-            <span class="badge ${tx.tx_type === 'strong' ? 'badge-strong' : 'badge-light'}">
+            <span style="font-size: 10px; padding: 3px 8px; border-radius: 4px; font-weight: 600; text-transform: uppercase; background: ${tx.tx_type === 'strong' ? 'rgba(245, 158, 11, 0.15)' : 'rgba(6, 182, 212, 0.15)'}; color: ${tx.tx_type === 'strong' ? '#fbbf24' : '#38bdf8'}">
               ${tx.tx_type}
             </span>
           </div>
@@ -782,16 +885,15 @@
       }
 
       // Chain
-      document.getElementById('blockCountText').innerText = `${systemState.chain.length} Block${systemState.chain.length > 1 ? 's' : ''}`;
       const chainContainer = document.getElementById('blockchainContainer');
       chainContainer.innerHTML = systemState.chain.map((b, i) => {
         const isGenesis = b.index === 0;
-        const diffClass = b.difficulty <= 1 ? 'diff-1' : 'diff-3';
+        const diffClass = b.difficulty <= 1 ? 'diff-1' : (b.difficulty === 2 ? 'diff-2' : 'diff-3');
         return `
-          <div class="block-card" id="cardBlock${b.index}">
+          <div class="block-card ${!systemState.chain_valid && !isGenesis ? 'tampered' : ''}" id="cardBlock${b.index}">
             <div class="block-header">
               <span class="block-number">Block #${b.index} ${isGenesis ? '(Genesis)' : ''}</span>
-              <div class="block-meta">
+              <div style="display: flex; align-items: center; gap: 8px;">
                 <span class="diff-badge ${diffClass}">Diff: ${b.difficulty} (${'0'.repeat(b.difficulty)}...)</span>
                 <span style="font-size: 11px; color: var(--text-muted);">Nonce: ${b.nonce}</span>
               </div>
@@ -802,19 +904,25 @@
 
             <div style="margin-top: 10px;">
               <span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">Transactions Included (${b.transactions.length}):</span>
-              ${b.transactions.length === 0 ? '<div style="font-size: 11px; color: var(--text-muted); padding: 4px 0;">No transactions (Genesis)</div>' : 
+              ${b.transactions.length === 0 ? '<div style="font-size: 11px; color: var(--text-muted); padding: 4px 0;">Genesis Block (Coinbase seed)</div>' : 
                 b.transactions.map(t => `
                   <div style="font-size: 11px; margin-top: 4px; display: flex; justify-content: space-between;">
                     <span>${t.sender} → ${t.receiver}</span>
-                    <span style="font-weight: 600; color: ${t.tx_type === 'strong' ? 'var(--gold)' : 'var(--cyan)'}">₹${t.amount.toLocaleString(undefined, {minimumFractionDigits: 2})} (${t.tx_type})</span>
+                    <span style="font-weight: 600; color: ${t.tx_type === 'strong' ? 'var(--gold)' : 'var(--cyan)'}">INR ${t.amount.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
                   </div>
                 `).join('')
               }
             </div>
 
+            ${b.ml_reason ? `
+              <div class="ml-callout">
+                🤖 <strong>ML Consensus Reason:</strong> ${b.ml_reason}
+              </div>
+            ` : ''}
+
             <div class="block-stats">
               <span>Hash Attempts: <strong>${b.hash_attempts}</strong></span>
-              <span>Mining CPU Time: <strong>${(b.cpu_time * 1000).toFixed(1)} ms</strong></span>
+              <span>Mining Time: <strong>${(b.cpu_time * 1000).toFixed(1)} ms</strong></span>
             </div>
 
             ${!isGenesis ? `
@@ -827,8 +935,9 @@
       }).reverse().join('');
     }
 
-    // Initial load & periodic polling
+    // Initialize
     fetchState();
+    runLiveMLCheck();
     setInterval(fetchState, 3000);
   </script>
 </body>
