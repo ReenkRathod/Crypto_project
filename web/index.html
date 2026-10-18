@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adaptive Hybrid Consensus Blockchain Explorer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card-bg: rgba(22, 28, 45, 0.85);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --card-hover: rgba(30, 41, 68, 0.95);
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --cyan: #06b6d4;
+      --cyan-glow: rgba(6, 182, 212, 0.25);
+      --green: #10b981;
+      --green-glow: rgba(16, 185, 129, 0.25);
+      --red: #ef4444;
+      --red-glow: rgba(239, 68, 68, 0.3);
+      --gold: #f59e0b;
+      --gold-glow: rgba(245, 158, 11, 0.25);
+      --purple: #8b5cf6;
+      --radius: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background-color: var(--bg);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(6, 182, 212, 0.08) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.08) 0px, transparent 50%);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* Top Navigation / Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 28px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      backdrop-filter: blur(12px);
+      margin-bottom: 24px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .brand h1 {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #fff, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand p {
+      font-size: 13px;
+      color: var(--cyan);
+      font-weight: 500;
+      margin-top: 3px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: all 0.3s ease;
+    }
+
+    .status-valid {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      box-shadow: 0 0 15px var(--green-glow);
+    }
+
+    .status-invalid {
+      background: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.5);
+      box-shadow: 0 0 20px var(--red-glow);
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    .btn {
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 10px 18px;
+      border-radius: 8px;
+      border: none;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-reset {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      border: 1px solid var(--card-border);
+    }
+
+    .btn-reset:hover {
+      background: rgba(255, 255, 255, 0.14);
+    }
+
+    /* Grid Layout */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 1024px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Card Panels */
+    .panel {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 22px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      margin-bottom: 24px;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .panel-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Forms & Inputs */
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    .form-control {
+      width: 100%;
+      background: rgba(11, 15, 25, 0.7);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 2px var(--cyan-glow);
+    }
+
+    .preset-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .btn-preset {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.25);
+      color: var(--cyan);
+      font-size: 11px;
+      padding: 8px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s ease;
+    }
+
+    .btn-preset:hover {
+      background: rgba(6, 182, 212, 0.2);
+    }
+
+    .btn-preset.strong {
+      background: rgba(245, 158, 11, 0.1);
+      border-color: rgba(245, 158, 11, 0.25);
+      color: var(--gold);
+    }
+
+    .btn-preset.strong:hover {
+      background: rgba(245, 158, 11, 0.2);
+    }
+
+    .btn-primary {
+      width: 100%;
+      background: linear-gradient(135deg, var(--cyan), #3b82f6);
+      color: #fff;
+      padding: 12px;
+      font-size: 14px;
+      border-radius: 8px;
+      box-shadow: 0 4px 15px var(--cyan-glow);
+    }
+
+    .btn-primary:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
+    }
+
+    /* Consensus Controller */
+    .mode-selector {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+      background: rgba(11, 15, 25, 0.6);
+      padding: 4px;
+      border-radius: 10px;
+    }
+
+    .mode-btn {
+      flex: 1;
+      padding: 10px;
+      background: transparent;
+      border: none;
+      border-radius: 8px;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .mode-btn.active {
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .mode-btn.active.hybrid {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.3), rgba(139, 92, 246, 0.3));
+      color: #38bdf8;
+      border: 1px solid rgba(6, 182, 212, 0.4);
+    }
+
+    .btn-mine {
+      width: 100%;
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #fff;
+      padding: 14px;
+      font-size: 15px;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px var(--green-glow);
+    }
+
+    .btn-mine:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
+    }
+
+    /* Mining Feedback Box */
+    .mine-feedback {
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: 8px;
+      background: rgba(11, 15, 25, 0.8);
+      border: 1px solid var(--card-border);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      display: none;
+    }
+
+    /* Mempool Transactions List */
+    .tx-list {
+      max-height: 220px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .tx-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 12px;
+      background: rgba(11, 15, 25, 0.5);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      font-size: 12px;
+    }
+
+    .tx-item .badge {
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .badge-light {
+      background: rgba(6, 182, 212, 0.15);
+      color: #38bdf8;
+    }
+
+    .badge-strong {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+    }
+
+    /* Blockchain Explorer Cards */
+    .chain-container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .block-card {
+      background: rgba(22, 28, 45, 0.9);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 20px;
+      position: relative;
+      transition: all 0.25s ease;
+    }
+
+    .block-card:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .block-card.tampered {
+      border-color: var(--red) !important;
+      background: rgba(239, 68, 68, 0.08) !important;
+      box-shadow: 0 0 25px var(--red-glow) !important;
+    }
+
+    .block-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .block-number {
+      font-size: 17px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .block-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .diff-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+
+    .diff-1 {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .diff-3 {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .hash-field {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      word-break: break-all;
+    }
+
+    .hash-val {
+      color: #38bdf8;
+    }
+
+    .block-stats {
+      display: flex;
+      gap: 20px;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px dashed var(--card-border);
+    }
+
+    .block-actions {
+      margin-top: 12px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .btn-tamper {
+      background: rgba(239, 68, 68, 0.1);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      padding: 6px 12px;
+      font-size: 11px;
+    }
+
+    .btn-tamper:hover {
+      background: rgba(239, 68, 68, 0.2);
+    }
+
+    /* Analytics Gallery */
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+
+    .chart-card {
+      background: rgba(11, 15, 25, 0.6);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 12px;
+    }
+
+    .chart-card h4 {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .chart-card img {
+      width: 100%;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <div class="brand">
+        <h1>Adaptive Hybrid Consensus Explorer</h1>
+        <p>BCSE328L Cryptocurrency Technologies — Dynamic PoW Difficulty Scaling</p>
+      </div>
+      <div class="header-actions">
+        <div id="chainStatusBadge" class="status-badge status-valid">
+          <span style="font-size: 16px;">●</span> Chain Integrity: 100% Valid
+        </div>
+        <button onclick="resetBlockchain()" class="btn btn-reset">↺ Reset Chain</button>
+      </div>
+    </header>
+
+    <!-- Main Grid -->
+    <div class="dashboard-grid">
+      <!-- Left Column: Controls & Mempool -->
+      <div>
+        <!-- Create Transaction Panel -->
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">💳 Submit Transaction</span>
+            <span id="mempoolCountBadge" style="font-size: 11px; color: var(--cyan);">2 in pool</span>
+          </div>
+
+          <!-- Quick Presets -->
+          <div class="form-label">Quick Real-World Presets:</div>
+          <div class="preset-buttons">
+            <button class="btn-preset" onclick="fillPreset('0xRohan22', '0xChaiPoint', 25.0, 'lightweight')">
+              ☕ ₹25 Chai (Light)
+            </button>
+            <button class="btn-preset" onclick="fillPreset('0xPriya77', '0xMetroCard', 60.0, 'lightweight')">
+              🚆 ₹60 Metro (Light)
+            </button>
+            <button class="btn-preset strong" onclick="fillPreset('0xFinCorp', '0xEscrowVault', 250000.0, 'strong')">
+              🏛️ ₹2.5L Escrow (Strong)
+            </button>
+            <button class="btn-preset strong" onclick="fillPreset('0xTechCorp', '0xVendorSettlement', 850000.0, 'strong')">
+              📑 ₹8.5L Contract (Strong)
+            </button>
+          </div>
+
+          <form id="txForm" onsubmit="handleTransactionSubmit(event)">
+            <div class="form-group">
+              <label class="form-label">Sender Address</label>
+              <input type="text" id="txSender" class="form-control" value="0xAlice_4A" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Receiver Address</label>
+              <input type="text" id="txReceiver" class="form-control" value="0xBob_9F" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Transfer Amount (₹)</label>
+              <input type="number" id="txAmount" class="form-control" value="50.0" step="0.01" min="0.01" oninput="updateTxTypeHint()" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Risk Category (Auto-classified)</label>
+              <select id="txType" class="form-control">
+                <option value="lightweight">Lightweight (Micropayment &lt; ₹1,000)</option>
+                <option value="strong">Strong (High-Value Transfer &gt;= ₹1,000)</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary">+ Add to Transaction Pool</button>
+          </form>
+        </div>
+
+        <!-- Consensus Engine & Mining Controller -->
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">⛏️ Consensus Mining Engine</span>
+          </div>
+
+          <div class="form-label">Choose Mining Mechanism:</div>
+          <div class="mode-selector">
+            <button id="modeHybrid" class="mode-btn active hybrid" onclick="setConsensusMode('hybrid')">
+              Proposed: Hybrid (Adaptive)
+            </button>
+            <button id="modeBaseline" class="mode-btn" onclick="setConsensusMode('baseline')">
+              Baseline: Uniform (Fixed Diff)
+            </button>
+          </div>
+
+          <div id="modeDescription" style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5;">
+            ⚡ <strong>Hybrid Engine</strong>: Evaluates pending transactions. If all are lightweight, difficulty is set to <strong>1</strong> (fast, green). If any is high-value, difficulty elevates to <strong>3</strong> for heavy security.
+          </div>
+
+          <button onclick="mineBlock()" class="btn btn-mine">⚡ Mine Next Block Now</button>
+
+          <!-- Mining Feedback -->
+          <div id="mineFeedback" class="mine-feedback"></div>
+        </div>
+
+        <!-- Mempool List -->
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">⏳ Unconfirmed Mempool</span>
+          </div>
+          <div id="mempoolList" class="tx-list"></div>
+        </div>
+      </div>
+
+      <!-- Right Column: Live Blockchain Visualizer & Charts -->
+      <div>
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">⛓️ Live Blockchain Ledger (<span id="blockCountText">1 Block</span>)</span>
+            <span style="font-size: 12px; color: var(--text-muted);">Real-time cryptographic hash-chain</span>
+          </div>
+          <div id="blockchainContainer" class="chain-container"></div>
+        </div>
+
+        <!-- Benchmark Charts Section -->
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">📊 Empirical Benchmark Results</span>
+            <span style="font-size: 12px; color: var(--cyan);">Generated from experimental suite</span>
+          </div>
+          <div class="analytics-grid">
+            <div class="chart-card">
+              <h4>Average Latency vs Load</h4>
+              <img src="/results/charts/latency_vs_load.png" alt="Latency Chart" onerror="this.parentElement.style.display='none'">
+            </div>
+            <div class="chart-card">
+              <h4>Hash Cost Reduction</h4>
+              <img src="/results/charts/cost_vs_load.png" alt="Cost Chart" onerror="this.parentElement.style.display='none'">
+            </div>
+            <div class="chart-card">
+              <h4>Throughput (tx/s) Scaling</h4>
+              <img src="/results/charts/throughput_vs_load.png" alt="Throughput Chart" onerror="this.parentElement.style.display='none'">
+            </div>
+            <div class="chart-card">
+              <h4>Effect of Lightweight Mix</h4>
+              <img src="/results/charts/mix_effect.png" alt="Mix Effect Chart" onerror="this.parentElement.style.display='none'">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentMode = 'hybrid';
+    let systemState = null;
+
+    async function fetchState() {
+      try {
+        const res = await fetch('/api/state');
+        systemState = await res.json();
+        renderDashboard();
+      } catch (err) {
+        console.error("Failed to load blockchain state", err);
+      }
+    }
+
+    function setConsensusMode(mode) {
+      currentMode = mode;
+      const bHybrid = document.getElementById('modeHybrid');
+      const bBase = document.getElementById('modeBaseline');
+      const desc = document.getElementById('modeDescription');
+
+      if (mode === 'hybrid') {
+        bHybrid.className = 'mode-btn active hybrid';
+        bBase.className = 'mode-btn';
+        desc.innerHTML = '⚡ <strong>Proposed Hybrid Engine</strong>: Evaluates transaction batch. If all are lightweight, difficulty is set to <strong>1</strong> (fast, green). If any is high-value, difficulty elevates to <strong>3</strong> for heavy security.';
+      } else {
+        bBase.className = 'mode-btn active';
+        bHybrid.className = 'mode-btn';
+        desc.innerHTML = '🔒 <strong>Baseline Engine</strong>: Imposes fixed difficulty (3 leading zeros) on 100% of blocks regardless of whether transactions are small or large.';
+      }
+    }
+
+    function updateTxTypeHint() {
+      const amt = parseFloat(document.getElementById('txAmount').value) || 0;
+      const sel = document.getElementById('txType');
+      sel.value = amt >= 1000 ? 'strong' : 'lightweight';
+    }
+
+    function fillPreset(sender, receiver, amount, type) {
+      document.getElementById('txSender').value = sender;
+      document.getElementById('txReceiver').value = receiver;
+      document.getElementById('txAmount').value = amount;
+      document.getElementById('txType').value = type;
+    }
+
+    async function handleTransactionSubmit(e) {
+      e.preventDefault();
+      const sender = document.getElementById('txSender').value;
+      const receiver = document.getElementById('txReceiver').value;
+      const amount = parseFloat(document.getElementById('txAmount').value);
+      const tx_type = document.getElementById('txType').value;
+
+      const res = await fetch('/api/transaction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sender, receiver, amount, tx_type })
+      });
+      const data = await res.json();
+      if (data.success) {
+        fetchState();
+      }
+    }
+
+    async function mineBlock() {
+      const feedback = document.getElementById('mineFeedback');
+      feedback.style.display = 'block';
+      feedback.innerHTML = '<span style="color: #38bdf8;">⛏️ Mining block in progress... computing SHA-256 nonces...</span>';
+
+      const res = await fetch('/api/mine', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode: currentMode })
+      });
+      const data = await res.json();
+      if (!data.success) {
+        feedback.innerHTML = `<span style="color: #f87171;">⚠️ ${data.message}</span>`;
+        return;
+      }
+
+      feedback.innerHTML = `
+        <div style="color: #34d399; font-weight: bold; margin-bottom: 4px;">✓ Block #${data.block_index} Successfully Mined!</div>
+        <div>Consensus Mode: <strong>${data.mode.toUpperCase()}</strong></div>
+        <div>Difficulty Applied: <strong>${data.difficulty_applied} leading zero(s)</strong></div>
+        <div>Hash Attempts: <strong>${data.hash_attempts.toLocaleString()}</strong></div>
+        <div>Mining Wall-Clock: <strong>${data.mining_time_ms} ms</strong></div>
+        <div>New Hash: <span style="color: #38bdf8;">${data.block_hash.substring(0, 24)}...</span></div>
+      `;
+      fetchState();
+    }
+
+    async function tamperBlock(idx) {
+      if (!confirm(`Are you sure you want to tamper with Block #${idx}? This will modify its transaction data and demonstrate chain invalidation.`)) return;
+
+      const res = await fetch('/api/tamper', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ block_index: idx })
+      });
+      const data = await res.json();
+      alert(data.message);
+      fetchState();
+    }
+
+    async function resetBlockchain() {
+      if (!confirm("Reset blockchain back to Genesis?")) return;
+      await fetch('/api/reset', { method: 'POST' });
+      document.getElementById('mineFeedback').style.display = 'none';
+      fetchState();
+    }
+
+    function renderDashboard() {
+      if (!systemState) return;
+
+      // Status Badge
+      const statusBadge = document.getElementById('chainStatusBadge');
+      if (systemState.chain_valid) {
+        statusBadge.className = 'status-badge status-valid';
+        statusBadge.innerHTML = '<span style="font-size: 16px;">●</span> Chain Integrity: 100% Valid';
+      } else {
+        statusBadge.className = 'status-badge status-invalid';
+        statusBadge.innerHTML = '<span style="font-size: 16px;">⚠️</span> TAMPER DETECTED: INVALID HASH-CHAIN!';
+      }
+
+      // Mempool
+      document.getElementById('mempoolCountBadge').innerText = `${systemState.mempool.length} in pool`;
+      const mempoolList = document.getElementById('mempoolList');
+      if (systemState.mempool.length === 0) {
+        mempoolList.innerHTML = '<div style="color: var(--text-muted); font-size: 12px; padding: 12px; text-align: center;">Mempool empty. Add transactions above!</div>';
+      } else {
+        mempoolList.innerHTML = systemState.mempool.map(tx => `
+          <div class="tx-item">
+            <div>
+              <div style="font-weight: 600;">${tx.sender} → ${tx.receiver}</div>
+              <div style="color: var(--text-muted); font-size: 11px;">₹${tx.amount.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+            </div>
+            <span class="badge ${tx.tx_type === 'strong' ? 'badge-strong' : 'badge-light'}">
+              ${tx.tx_type}
+            </span>
+          </div>
+        `).join('');
+      }
+
+      // Chain
+      document.getElementById('blockCountText').innerText = `${systemState.chain.length} Block${systemState.chain.length > 1 ? 's' : ''}`;
+      const chainContainer = document.getElementById('blockchainContainer');
+      chainContainer.innerHTML = systemState.chain.map((b, i) => {
+        const isGenesis = b.index === 0;
+        const diffClass = b.difficulty <= 1 ? 'diff-1' : 'diff-3';
+        return `
+          <div class="block-card" id="cardBlock${b.index}">
+            <div class="block-header">
+              <span class="block-number">Block #${b.index} ${isGenesis ? '(Genesis)' : ''}</span>
+              <div class="block-meta">
+                <span class="diff-badge ${diffClass}">Diff: ${b.difficulty} (${'0'.repeat(b.difficulty)}...)</span>
+                <span style="font-size: 11px; color: var(--text-muted);">Nonce: ${b.nonce}</span>
+              </div>
+            </div>
+
+            <div class="hash-field">Hash: <span class="hash-val">${b.hash}</span></div>
+            <div class="hash-field">Prev: <span>${b.previous_hash}</span></div>
+
+            <div style="margin-top: 10px;">
+              <span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">Transactions Included (${b.transactions.length}):</span>
+              ${b.transactions.length === 0 ? '<div style="font-size: 11px; color: var(--text-muted); padding: 4px 0;">No transactions (Genesis)</div>' : 
+                b.transactions.map(t => `
+                  <div style="font-size: 11px; margin-top: 4px; display: flex; justify-content: space-between;">
+                    <span>${t.sender} → ${t.receiver}</span>
+                    <span style="font-weight: 600; color: ${t.tx_type === 'strong' ? 'var(--gold)' : 'var(--cyan)'}">₹${t.amount.toLocaleString(undefined, {minimumFractionDigits: 2})} (${t.tx_type})</span>
+                  </div>
+                `).join('')
+              }
+            </div>
+
+            <div class="block-stats">
+              <span>Hash Attempts: <strong>${b.hash_attempts}</strong></span>
+              <span>Mining CPU Time: <strong>${(b.cpu_time * 1000).toFixed(1)} ms</strong></span>
+            </div>
+
+            ${!isGenesis ? `
+              <div class="block-actions">
+                <button onclick="tamperBlock(${b.index})" class="btn btn-tamper">⚠️ Tamper with Block #${b.index}</button>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).reverse().join('');
+    }
+
+    // Initial load & periodic polling
+    fetchState();
+    setInterval(fetchState, 3000);
+  </script>
+</body>
+</html>
