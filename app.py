@@ -18,7 +18,8 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse
 
 from blockchain import Block, Blockchain, Transaction
-from consensus import BaselineConsensus, HybridConsensus
+from consensus import BaselineConsensus, HybridConsensus, MLAdaptiveConsensus
+from ml_engine import ml_engine
 
 PORT = 5000
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -30,6 +31,7 @@ chain = Blockchain()
 mempool = []
 baseline_engine = BaselineConsensus(difficulty=3)
 hybrid_engine = HybridConsensus(light_difficulty=1, strong_difficulty=3)
+ml_engine_consensus = MLAdaptiveConsensus()
 
 def seed_initial_mempool():
     global mempool
@@ -66,6 +68,7 @@ def serialize_block(b: Block) -> dict:
         "timestamp": b.timestamp,
         "hash_attempts": getattr(b, "hash_attempts", 0),
         "cpu_time": getattr(b, "cpu_time", 0.0),
+        "ml_reason": getattr(b, "ml_reason", ""),
     }
 
 
@@ -228,7 +231,13 @@ class BlockchainRequestHandler(BaseHTTPRequestHandler):
             batch_to_mine = list(mempool)
             mempool.clear()
 
-            engine = hybrid_engine if mode == "hybrid" else baseline_engine
+            if mode == "baseline":
+                engine = baseline_engine
+            elif mode == "heuristic":
+                engine = hybrid_engine
+            else:  # "hybrid" or "ml" uses MLAdaptiveConsensus
+                engine = ml_engine_consensus
+
             t_start = time.perf_counter()
             result = engine.mine(chain, batch_to_mine)
             t_end = time.perf_counter()
@@ -245,6 +254,7 @@ class BlockchainRequestHandler(BaseHTTPRequestHandler):
                 "block_hash": result.block.compute_hash(),
                 "chain_valid": chain.verify_chain(),
                 "transactions_mined": len(batch_to_mine),
+                "ml_reason": getattr(result.block, "ml_reason", ""),
             })
             return
 
