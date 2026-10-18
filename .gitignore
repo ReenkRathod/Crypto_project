@@ -11,6 +11,9 @@ context.md
 generate_presentation.py
 *.docx
 IEEE_Paper_HQEC_Framework.md
+*.zip
+paper_package/
+scratch/
 
 # Local virtual environment
 .venv/
