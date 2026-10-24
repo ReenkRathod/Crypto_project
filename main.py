@@ -31,17 +31,21 @@ if sys.stdout.encoding and sys.stdout.encoding.lower().startswith("cp"):
         sys.stderr.buffer, encoding="utf-8", errors="replace"
     )
 
-from experiment import ExperimentConfig, run_full_experiment_suite
+from experiment import (
+    ExperimentConfig,
+    run_full_experiment_suite,
+    run_adversarial_security_benchmark,
+)
 from visualize import generate_charts, save_csv, save_markdown
 
 
 def print_banner() -> None:
     banner = """
     +==================================================================+
-    |  A Lightweight Hybrid Consensus Mechanism for Efficient           |
-    |  Blockchain Transactions                                          |
-    |                                                                    |
-    |  Cryptocurrency & Technology -- University Course Project          |
+    |  Intelligent Adaptive Consensus Mechanism for High-Throughput     |
+    |  Blockchain Networks using Explainable AI Telemetry               |
+    |                                                                  |
+    |  Course Project: BCSE328L Cryptocurrency Technologies (VIT)      |
     +==================================================================+
     """
     print(banner)
@@ -171,12 +175,13 @@ def main() -> None:
     # Chain verification summary
     print(f"\n  Chain Integrity Verification:")
     all_valid = True
-    for cfg, b, h in results:
+    for cfg, b, h, m in results:
         status_b = "PASS" if b.chain_valid else "FAIL"
         status_h = "PASS" if h.chain_valid else "FAIL"
+        status_m = "PASS" if m.chain_valid else "FAIL"
         print(f"    {cfg.num_transactions:>5} txs, {cfg.lightweight_ratio:.0%} light: "
-              f"Baseline={status_b}  Proposed={status_h}")
-        if not b.chain_valid or not h.chain_valid:
+              f"Baseline={status_b}  Heuristic={status_h}  ML-Adaptive={status_m}")
+        if not b.chain_valid or not h.chain_valid or not m.chain_valid:
             all_valid = False
 
     if all_valid:
@@ -187,21 +192,27 @@ def main() -> None:
 
     # Quick comparison for the largest load
     largest = max(results, key=lambda r: r[0].num_transactions)
-    cfg, b, h = largest
-    if b.avg_latency_mean > 0:
-        lat_imp = (b.avg_latency_mean - h.avg_latency_mean) / b.avg_latency_mean * 100
-    else:
-        lat_imp = 0
-    if b.total_hash_attempts_mean > 0:
-        hash_imp = (b.total_hash_attempts_mean - h.total_hash_attempts_mean) / b.total_hash_attempts_mean * 100
-    else:
-        hash_imp = 0
+    cfg, b, h, m = largest
+    lat_imp = ((b.avg_latency_mean - m.avg_latency_mean) / b.avg_latency_mean * 100) if b.avg_latency_mean > 0 else 0
+    hash_imp = ((b.total_hash_attempts_mean - m.total_hash_attempts_mean) / b.total_hash_attempts_mean * 100) if b.total_hash_attempts_mean > 0 else 0
+    tp_imp = ((m.throughput_mean - b.throughput_mean) / b.throughput_mean * 100) if b.throughput_mean > 0 else 0
 
     print(f"\n  Key findings at {cfg.num_transactions} txs, {cfg.lightweight_ratio:.0%} light:")
-    print(f"    Latency reduction:    {lat_imp:+.1f}%")
-    print(f"    Hash cost reduction:  {hash_imp:+.1f}%")
-    print(f"    Baseline throughput:  {b.throughput_mean:.1f} tx/s")
-    print(f"    Proposed throughput:  {h.throughput_mean:.1f} tx/s")
+    print(f"    ML Latency reduction vs Baseline:   {lat_imp:+.1f}%")
+    print(f"    ML Hash cost reduction vs Baseline: {hash_imp:+.1f}%")
+    print(f"    ML Throughput improvement:          {tp_imp:+.1f}% ({b.throughput_mean:.1f} -> {m.throughput_mean:.1f} tx/s)")
+    print()
+
+    # Adversarial Security Benchmark
+    print(f"{'='*60}")
+    print("  ADVERSARIAL SECURITY & STRUCTURING RESILIENCE BENCHMARK")
+    print(f"{'='*60}")
+    adv_res = run_adversarial_security_benchmark()
+    print(f"  Attack Scenario:             {adv_res['attack_type']}")
+    print(f"  Burst Transactions Injected: {adv_res['attack_transactions']} x INR {adv_res['target_amount_per_tx']:.2f}")
+    print(f"  Heuristic Defense Assigned:  Difficulty {adv_res['heuristic_difficulty_assigned']} (Vulnerable: {'INTERCEPTED' if adv_res['heuristic_intercepted'] else 'FAILED - Kept Diff 1'})")
+    print(f"  ML-Adaptive Defense Assigned:Difficulty {adv_res['ml_difficulty_assigned']} (Secure: {'INTERCEPTED - Scaled to Diff 3' if adv_res['ml_intercepted'] else 'FAILED'})")
+    print(f"  ML Explainable AI Reasoning: {adv_res['ml_reasoning']}")
     print()
 
 

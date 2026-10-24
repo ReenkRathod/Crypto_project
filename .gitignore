@@ -1,0 +1,21 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Project documentation & context memory
+context.md
+
+# Papers & Presentation artifacts
+*.pptx
+generate_presentation.py
+*.docx
+IEEE_Paper_HQEC_Framework.md
+*.zip
+paper_package/
+scratch/
+
+# Local virtual environment
+.venv/
+env/
+venv/

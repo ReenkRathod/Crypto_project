@@ -131,3 +131,35 @@ class HybridConsensus:
             difficulty=difficulty,
         )
         return _mine_block(block)
+
+
+# ──────────────────────────────────────────────
+# Machine Learning Adaptive Consensus
+# ──────────────────────────────────────────────
+class MLAdaptiveConsensus:
+    """Intelligent consensus engine powered by ConsensusMLEngine.
+
+    Replaces static thresholds with multi-feature telemetry evaluation,
+    dynamically scaling difficulty (1 to 3) while actively preventing
+    structuring and smurfing attacks.
+    """
+
+    def __init__(self) -> None:
+        from ml_engine import ml_engine
+        self.ml_engine = ml_engine
+
+    def mine(
+        self,
+        chain: Blockchain,
+        transactions: List[Transaction],
+    ) -> MineResult:
+        difficulty, reason, _ = self.ml_engine.evaluate_batch(transactions)
+        block = Block(
+            index=len(chain),
+            transactions=transactions,
+            previous_hash=chain.last_block.compute_hash(),
+            difficulty=difficulty,
+        )
+        block.ml_reason = reason
+        return _mine_block(block)
+
